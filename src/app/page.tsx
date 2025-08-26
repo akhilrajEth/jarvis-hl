@@ -15,30 +15,36 @@ export default function Home() {
   const router = useRouter();
   const { ready, authenticated, user, login } = usePrivy();
 
+  const [loginInitiated, setLoginInitiated] = React.useState(false);
+
   useEffect(() => {
     const handleUserSession = async () => {
       if (ready && authenticated && user?.wallet?.address) {
-        console.log("User is authenticated, checking database...");
-
         const embeddedAccount = user.linkedAccounts.find(
           (account) =>
             account.type === "wallet" && account.walletClientType === "privy"
         );
-
         if (embeddedAccount) {
           await findOrCreateUser(user.wallet.address, embeddedAccount);
+        }
+        // Only redirect if login was initiated by button
+        if (loginInitiated) {
           router.push("/riskprofile");
-        } else {
-          console.error("Embedded wallet not found after login.");
+          setLoginInitiated(false);
         }
       }
     };
-
     handleUserSession();
-  }, [ready, authenticated, user, router]);
+  }, [ready, authenticated, user, loginInitiated, router]);
 
-  const handleLogin = () => {
-    login();
+  const handleButtonClick = async () => {
+    if (!authenticated) {
+      setLoginInitiated(true);
+      await login();
+      // Do not redirect here; wait for authentication in useEffect
+    } else {
+      router.push("/riskprofile");
+    }
   };
 
   return (
@@ -59,14 +65,9 @@ export default function Home() {
           </span>
         </Typography>
 
-        <Typography variant="h5" component="p" gutterBottom>
-          I can optimize your DeFi yield for you.
-        </Typography>
-
         <Typography
           variant="body1"
-          component="p"
-          sx={{ fontStyle: "italic", color: "gray", marginBottom: 4 }}
+          sx={{ mb: 4, maxWidth: 500, fontSize: 20 }}
         >
           No manual tweaking needed – just set it and forget it.
         </Typography>
@@ -75,9 +76,9 @@ export default function Home() {
           variant="contained"
           size="large"
           sx={ButtonStyles}
-          onClick={handleLogin}
+          onClick={handleButtonClick}
         >
-          Get Started
+          {authenticated ? "Go to App" : "Get Started"}
         </Button>
       </Box>
     </div>
