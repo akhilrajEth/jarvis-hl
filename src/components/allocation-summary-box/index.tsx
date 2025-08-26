@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, Typography, IconButton, Modal, TextField } from "@mui/material";
+import { Card, Typography, IconButton, Modal, TextField, Avatar } from "@mui/material";
+import { VAULT_ASSET_LIST } from "../add-modal/assets";
 import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import PrimaryButton from "../primary-button";
@@ -56,7 +57,16 @@ export default function AllocationSummaryBox({
               >
                 Add
               </PrimaryButton>
-            ) : null}
+            ) : (
+              // Vault allocation: show asset image as clickable link
+              <a href="https://app.loopingcollective.org/product/whlp" target="_blank" rel="noopener noreferrer">
+                <Avatar
+                  src={VAULT_ASSET_LIST[0].image}
+                  alt={VAULT_ASSET_LIST[0].name}
+                  sx={{ width: 48, height: 48, cursor: "pointer" }}
+                />
+              </a>
+            )}
           </div>
 
           <div className="mt-auto pt-4">

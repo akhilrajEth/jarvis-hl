@@ -1,6 +1,7 @@
 "use client";
 
-import { Modal, Card, Typography, Chip, TextField } from "@mui/material";
+import { Modal, Card, Typography, Chip, TextField, List, ListItem, ListItemAvatar, Avatar, ListItemText, Checkbox, ListItemButton } from "@mui/material";
+import { SPOT_ASSETS_LIST, LENDING_ASSETS_LIST, VAULT_ASSET_LIST, LP_ASSET_LIST } from "./assets";
 import { useEffect, useState } from "react";
 import PrimaryButton from "../primary-button";
 import { usePortfolio } from "@/providers/PortfolioProvider";
@@ -14,57 +15,62 @@ export default function AddModal({
 }: AddModalProps) {
   const { dispatch } = usePortfolio();
 
-  const [addresses, setAddresses] = useState<string[]>(["", "", "", "", ""]);
+  const [selectedAssets, setSelectedAssets] = useState<string[]>(allocation.allocations || []);
 
   useEffect(() => {
     if (open) {
-      const currentAddresses = allocation.allocations;
-      const newAddresses = [...currentAddresses];
-      while (newAddresses.length < 5) {
-        newAddresses.push("");
-      }
-      setAddresses(newAddresses);
+      setSelectedAssets(allocation.allocations || []);
     }
   }, [open, allocation.allocations]);
 
-  const handleAddressChange = (index: number, value: string) => {
-    const newAddresses = [...addresses];
-    newAddresses[index] = value;
-    setAddresses(newAddresses);
+  const handleToggleAsset = (address: string) => {
+    setSelectedAssets((prev) =>
+      prev.includes(address)
+        ? prev.filter((a) => a !== address)
+        : [...prev, address]
+    );
   };
 
   const handleSubmit = () => {
-    const finalAddresses = addresses.filter((addr) => addr.trim() !== "");
-    console.log("Submitting addresses:", finalAddresses);
-
     dispatch({
       type: "UPDATE_ALLOCATION",
       payload: {
         category: allocation.category,
-        allocations: finalAddresses,
+        allocations: selectedAssets,
       },
     });
     onClose();
   };
 
-  const assetInputFields = addresses.map((address, i) => (
-    <TextField
-      key={i}
-      variant="outlined"
-      fullWidth
-      value={address}
-      onChange={(e) => handleAddressChange(i, e.target.value)}
-      placeholder={"0x..."}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          borderRadius: "12px",
-          "&.Mui-focused fieldset": {
-            borderColor: "black",
-          },
-        },
-      }}
-    />
-  ));
+  // Choose asset list based on allocation category
+  let currentAssetList = SPOT_ASSETS_LIST;
+  if (allocation.category === "lending") currentAssetList = LENDING_ASSETS_LIST;
+  else if (allocation.category === "vault") currentAssetList = VAULT_ASSET_LIST;
+  else if (allocation.category === "lp") currentAssetList = LP_ASSET_LIST;
+
+  const assetList = (
+    <List>
+      {currentAssetList.map((asset) => (
+        <ListItem key={asset.address} disablePadding>
+          <ListItemButton onClick={() => handleToggleAsset(asset.address)}>
+            <ListItemAvatar>
+              <Avatar src={asset.image} alt={asset.name} />
+            </ListItemAvatar>
+            <ListItemText
+              primary={asset.name}
+              secondary={asset.address}
+            />
+            <Checkbox
+              edge="end"
+              checked={selectedAssets.includes(asset.address)}
+              tabIndex={-1}
+              disableRipple
+            />
+          </ListItemButton>
+        </ListItem>
+      ))}
+    </List>
+  );
 
   return (
     <Modal
@@ -108,7 +114,7 @@ export default function AddModal({
               </div>
             </div>
 
-            {assetInputFields}
+            {assetList}
 
             <div className="flex justify-end">
               <PrimaryButton onClick={handleSubmit}>Submit</PrimaryButton>

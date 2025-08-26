@@ -111,7 +111,7 @@ export default function Allocation() {
                 Please select your asset allocations.
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                If you'd like our agent to build a risk profile and recommend ones for you, please head here:
+                If you'd like our agent to build a risk profile and recommend allocations for you, please head here:
               </Typography>
               <PrimaryButton
                 onClick={() => router.push("/riskprofile")}

@@ -11,7 +11,7 @@ export const SPOT_ALLOCATION_FORMAT = {
 
 export const VAULT_ALLOCATION_FORMAT = {
   category: "HL Vault",
-  description: "Only support one vault.",
+  description: "Wrapped HL Vault",
   riskLevel: {
     description: "Managed Strategy Risk",
     bgColor: "#fff3e0",
