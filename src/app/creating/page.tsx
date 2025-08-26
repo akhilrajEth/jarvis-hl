@@ -10,6 +10,7 @@ import { updateUserPortfolio } from "@/utils/updateUserPortfolio";
 import { usePortfolio } from "@/providers/PortfolioProvider";
 import { useRouter } from "next/navigation";
 import { AllocationType } from "@/constants";
+import getATokenAddress from "@/utils/getATokenAddress";
 
 export default function Creating() {
   const [error, setError] = useState<string | null>(null);
