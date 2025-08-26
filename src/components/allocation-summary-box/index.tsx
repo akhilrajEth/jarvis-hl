@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, Typography } from "@mui/material";
+import { Card, Typography, IconButton, Modal, TextField } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import PrimaryButton from "../primary-button";
 import { useState } from "react";
@@ -19,6 +20,8 @@ export default function AllocationSummaryBox({
   hasButton = true,
 }: AllocationSummaryBoxProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditPercentOpen, setIsEditPercentOpen] = useState(false);
+  const [editPercent, setEditPercent] = useState(allocation.percentage);
   return (
     <>
       <Card
@@ -33,9 +36,14 @@ export default function AllocationSummaryBox({
         <div className="flex flex-col h-full">
           <div className="flex items-start justify-between">
             <div>
-              <Typography variant="h4" component="p" sx={{ lineHeight: 1.2 }}>
-                {allocation.percentage}%
-              </Typography>
+              <div className="flex items-center gap-2">
+                <Typography variant="h4" component="p" sx={{ lineHeight: 1.2 }}>
+                  {allocation.percentage}%
+                </Typography>
+                <IconButton size="small" onClick={() => setIsEditPercentOpen(true)}>
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </div>
               <Typography variant="h6">{format.category}</Typography>
             </div>
 
@@ -58,6 +66,41 @@ export default function AllocationSummaryBox({
           </div>
         </div>
       </Card>
+
+      {/* Edit Percentage Modal */}
+      <Modal open={isEditPercentOpen} onClose={() => setIsEditPercentOpen(false)}>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <Card sx={{ borderRadius: "24px", p: 3, minWidth: "350px" }}>
+            <Typography variant="h6">Edit {format.category} Percentage</Typography>
+            <TextField
+              type="number"
+              value={editPercent === 0 ? "" : editPercent}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "") {
+                  setEditPercent(0);
+                } else {
+                  setEditPercent(Number(val));
+                }
+              }}
+              inputProps={{ min: 0, max: 100 }}
+              sx={{ mt: 2, mb: 2 }}
+            />
+            <div className="flex justify-end gap-2">
+              <PrimaryButton onClick={() => setIsEditPercentOpen(false)} color="secondary">Cancel</PrimaryButton>
+              <PrimaryButton
+                onClick={() => {
+                  const event = new CustomEvent("validate-allocation-percent", {
+                    detail: { category: allocation.category, percentage: editPercent },
+                  });
+                  window.dispatchEvent(event);
+                  setIsEditPercentOpen(false);
+                }}
+              >Save</PrimaryButton>
+            </div>
+          </Card>
+        </div>
+      </Modal>
 
       <AddModal
         format={format}

@@ -10,6 +10,7 @@ import {
 import Navbar from "@/components/navbar";
 import PrimaryButton from "@/components/primary-button";
 import AllocationSummaryBox from "@/components/allocation-summary-box";
+import { useCallback } from "react";
 import EastRoundedIcon from "@mui/icons-material/EastRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PsychologyIcon from "@mui/icons-material/Psychology";
@@ -27,7 +28,23 @@ import {
 import { AllocationType } from "@/constants";
 
 export default function Allocation() {
-  const { state: portfolio } = usePortfolio();
+  const { state: portfolio, dispatch } = usePortfolio();
+  // Listen for percent edit events from AllocationSummaryBox
+  useEffect(() => {
+    const handler = (e: any) => {
+      const { category, percentage } = e.detail;
+      dispatch({
+        type: "SET_PORTFOLIO_PERCENTAGES",
+        payload: portfolio.map((item) =>
+          item.category === category
+            ? { category, percentage }
+            : { category: item.category, percentage: item.percentage }
+        ),
+      });
+    };
+    window.addEventListener("validate-allocation-percent", handler);
+    return () => window.removeEventListener("validate-allocation-percent", handler);
+  }, [portfolio, dispatch]);
   const router = useRouter();
   const { user } = usePrivy();
 
@@ -53,6 +70,11 @@ export default function Allocation() {
   }, [user?.wallet?.address]);
 
   const handleContinue = () => {
+    const total = portfolio.reduce((sum, item) => sum + item.percentage, 0);
+    if (total !== 100) {
+      alert("Total allocation percentage must add up to 100%.");
+      return;
+    }
     router.push("/preferences");
   };
 
@@ -72,14 +94,34 @@ export default function Allocation() {
 
       <main className="p-8 overflow-y-auto">
         <div className="flex flex-col gap-1">
-          <Typography variant="h6" fontWeight={550}>
-            Here’s the portfolio I designed for you...
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Your portfolio is based on a{" "}
-            <b className="text-black">{assessment?.risk_profile || "..."}</b>{" "}
-            risk profile. Start adding assets you prefer for each category.
-          </Typography>
+          {assessment ? (
+            <>
+              <Typography variant="h6" fontWeight={550}>
+                Here’s the portfolio I designed for you...
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Your portfolio is based on a{" "}
+                <b className="text-black">{assessment.risk_profile}</b>{" "}
+                risk profile. Start adding assets you prefer for each category.
+              </Typography>
+            </>
+          ) : (
+            <>
+              <Typography variant="h6" fontWeight={550}>
+                Please select your asset allocations.
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                If you'd like our agent to build a risk profile and recommend ones for you, please head here:
+              </Typography>
+              <PrimaryButton
+                onClick={() => router.push("/riskprofile")}
+                startIcon={<PsychologyIcon />}
+                sx={{ mt: 2 }}
+              >
+                Go to Risk Profile
+              </PrimaryButton>
+            </>
+          )}
         </div>
 
         <div className="max-w-[40rem] pt-8">
