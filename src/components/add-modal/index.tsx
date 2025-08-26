@@ -2,6 +2,7 @@
 
 import { Modal, Card, Typography, Chip, TextField, List, ListItem, ListItemAvatar, Avatar, ListItemText, Checkbox, ListItemButton } from "@mui/material";
 import { SPOT_ASSETS_LIST, LENDING_ASSETS_LIST, VAULT_ASSET_LIST, LP_ASSET_LIST } from "./assets";
+import type { Asset, LPAsset } from "./types";
 import { useEffect, useState } from "react";
 import PrimaryButton from "../primary-button";
 import { usePortfolio } from "@/providers/PortfolioProvider";
@@ -50,25 +51,63 @@ export default function AddModal({
 
   const assetList = (
     <List>
-      {currentAssetList.map((asset) => (
-        <ListItem key={asset.address} disablePadding>
-          <ListItemButton onClick={() => handleToggleAsset(asset.address)}>
-            <ListItemAvatar>
-              <Avatar src={asset.image} alt={asset.name} />
-            </ListItemAvatar>
-            <ListItemText
-              primary={asset.name}
-              secondary={asset.address}
-            />
-            <Checkbox
-              edge="end"
-              checked={selectedAssets.includes(asset.address)}
-              tabIndex={-1}
-              disableRipple
-            />
-          </ListItemButton>
-        </ListItem>
-      ))}
+      {(currentAssetList as Asset[]).map((asset) => {
+        const isLP = (a: Asset): a is LPAsset => 'image1' in a && 'image2' in a;
+        return (
+          <ListItem key={asset.address} disablePadding>
+            <ListItemButton onClick={() => handleToggleAsset(asset.address)}>
+              <ListItemAvatar>
+                {isLP(asset) ? (
+                  <div style={{ position: 'relative', width: 48, height: 48 }}>
+                    <img
+                      src={asset.image1}
+                      alt={asset.name + ' 1'}
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        width: 32,
+                        height: 32,
+                        zIndex: 2,
+                        borderRadius: '50%',
+                        border: '2px solid #222',
+                        background: '#222',
+                      }}
+                    />
+                    <img
+                      src={asset.image2}
+                      alt={asset.name + ' 2'}
+                      style={{
+                        position: 'absolute',
+                        left: 16,
+                        top: 16,
+                        width: 32,
+                        height: 32,
+                        zIndex: 1,
+                        borderRadius: '50%',
+                        border: '2px solid #222',
+                        background: '#222',
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <Avatar src={(asset as any).image} alt={asset.name} />
+                )}
+              </ListItemAvatar>
+              <ListItemText
+                primary={asset.name}
+                secondary={asset.address}
+              />
+              <Checkbox
+                edge="end"
+                checked={selectedAssets.includes(asset.address)}
+                tabIndex={-1}
+                disableRipple
+              />
+            </ListItemButton>
+          </ListItem>
+        );
+  })}
     </List>
   );
 
