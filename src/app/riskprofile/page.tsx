@@ -197,8 +197,14 @@ export default function RiskProfilePage() {
       </main>
 
       <div className="flex-shrink-0 p-8 pt-4">
-        <div className="w-full max-w-4xl mx-auto">
+        <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-4">
           <PromptBar onSubmit={handleSendMessage} />
+          <button
+            className="mt-4 px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-800 font-semibold"
+            onClick={() => router.push("/allocation")}
+          >
+            Skip
+          </button>
         </div>
       </div>
     </div>

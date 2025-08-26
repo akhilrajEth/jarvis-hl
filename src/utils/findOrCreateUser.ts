@@ -20,37 +20,22 @@ export const findOrCreateUser = async (
   }
 
   try {
-    const { data: existingUser, error: selectError } = await supabase
+    // Use upsert for atomic insert/update
+    const { data: upsertedUser, error: upsertError } = await supabase
       .from("users")
-      .select("*")
-      .eq("userPublicAddress", publicAddress)
-      .maybeSingle();
-
-    if (selectError) {
-      throw selectError;
-    }
-
-    if (existingUser) {
-      console.log(`User ${publicAddress} already exists.`);
-      return existingUser;
-    }
-
-    console.log(`Creating new user for ${publicAddress}...`);
-    const { data: newUser, error: insertError } = await supabase
-      .from("users")
-      .insert({
+      .upsert({
         userPublicAddress: publicAddress,
         embedded_account: embeddedAccount,
-      })
+      }, { onConflict: "userPublicAddress" })
       .select()
       .single();
 
-    if (insertError) {
-      throw insertError;
+    if (upsertError) {
+      throw upsertError;
     }
 
-    console.log(`Successfully created user:`, newUser);
-    return newUser;
+    console.log(`User upserted:`, upsertedUser);
+    return upsertedUser;
   } catch (error) {
     console.error(
       "Database error in findOrCreateUser:",
