@@ -14,6 +14,7 @@ export default function AddModal({
   open,
   onClose,
 }: AddModalProps) {
+  const [customAddress, setCustomAddress] = useState("");
   const { dispatch } = usePortfolio();
 
   const [selectedAssets, setSelectedAssets] = useState<string[]>(allocation.allocations || []);
@@ -49,9 +50,21 @@ export default function AddModal({
   else if (allocation.category === "vault") currentAssetList = VAULT_ASSET_LIST;
   else if (allocation.category === "lp") currentAssetList = LP_ASSET_LIST;
 
+  // Build a combined list: prefilled assets + custom addresses
+  const prefilledAddresses = (currentAssetList as Asset[]).map(a => a.address);
+  const customAddresses = selectedAssets.filter(addr => !prefilledAddresses.includes(addr));
+  const combinedAssets = [
+    ...(currentAssetList as Asset[]),
+    ...customAddresses.map(addr => ({
+      name: "Custom Token",
+      address: addr,
+      image: undefined,
+    }))
+  ];
+
   const assetList = (
     <List>
-      {(currentAssetList as Asset[]).map((asset) => {
+      {combinedAssets.map((asset) => {
         const isLP = (a: Asset): a is LPAsset => 'image1' in a && 'image2' in a;
         return (
           <ListItem key={asset.address} disablePadding>
@@ -90,8 +103,10 @@ export default function AddModal({
                       }}
                     />
                   </div>
+                ) : asset.image ? (
+                  <Avatar src={asset.image} alt={asset.name} />
                 ) : (
-                  <Avatar src={(asset as any).image} alt={asset.name} />
+                  <Avatar>{asset.name[0]}</Avatar>
                 )}
               </ListItemAvatar>
               <ListItemText
@@ -107,7 +122,7 @@ export default function AddModal({
             </ListItemButton>
           </ListItem>
         );
-  })}
+      })}
     </List>
   );
 
@@ -153,7 +168,35 @@ export default function AddModal({
               </div>
             </div>
 
+
             {assetList}
+
+            {/* Add custom contract address input */}
+            <div className="flex items-center gap-2 mt-4">
+              <TextField
+                label="paste contract address"
+                variant="outlined"
+                size="small"
+                value={customAddress}
+                onChange={e => setCustomAddress(e.target.value)}
+                sx={{ flex: 1 }}
+              />
+              <PrimaryButton
+                onClick={() => {
+                  if (customAddress && /^0x[a-fA-F0-9]{40}$/.test(customAddress)) {
+                    setSelectedAssets(prev =>
+                      prev.includes(customAddress)
+                        ? prev
+                        : [...prev, customAddress]
+                    );
+                    setCustomAddress("");
+                  }
+                }}
+                disabled={!customAddress || !/^0x[a-fA-F0-9]{40}$/.test(customAddress)}
+              >
+                Add
+              </PrimaryButton>
+            </div>
 
             <div className="flex justify-end">
               <PrimaryButton onClick={handleSubmit}>Submit</PrimaryButton>
