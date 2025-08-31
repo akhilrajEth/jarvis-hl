@@ -36,3 +36,9 @@ export interface BuildTxParams {
   deadline?: number;
   source?: string;
 }
+
+export interface TransactionCall {
+  to: string;
+  data: string;
+  value: string;
+}
