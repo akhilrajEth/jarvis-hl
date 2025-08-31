@@ -1,11 +1,20 @@
-// Note: Run this script with npx ts-node --project tsconfig.scripts.json scripts/kyberswap.ts
+// Note: Run this script with npx ts-node --project tsconfig.scripts.json scripts/kyberswap-aggregator.ts
 
 import axios from "axios";
 import { URLSearchParams } from "url";
 import * as dotenv from "dotenv";
 import { Contract, Interface, isAddress, JsonRpcProvider } from "ethers";
-import { BuildTxParams, TransactionCall, ZapApiParams } from "./types";
-import { API_BASE_URL, CHAIN_ID, ERC_20_ABI } from "./constants";
+import {
+  BuildAggregatorTxParams,
+  TransactionCall,
+  AggregatorApiParams,
+} from "./types";
+import {
+  AGGREGATOR_API_BASE_URL,
+  CHAIN_ID,
+  ERC_20_ABI,
+  NATIVE_TOKEN_ADDRESS,
+} from "./constants";
 
 dotenv.config({ path: ".env.local" });
 
@@ -16,49 +25,40 @@ if (!process.env.BASE_RPC_URL) {
 }
 const provider = new JsonRpcProvider(process.env.BASE_RPC_URL);
 
-const buildGetRouteApiUrl = (params: ZapApiParams): string => {
-  const searchParams = new URLSearchParams();
-  searchParams.append("dex", params.dex);
-  searchParams.append("pool.id", params["pool.id"]);
-  searchParams.append("slippage", params.slippage.toString());
+/**
+ * Builds the API URL for getting the aggregator swap route.
+ */
+const buildGetRouteApiUrl = (params: AggregatorApiParams): string => {
+  const searchParams = new URLSearchParams({
+    tokenIn: params.tokenIn,
+    tokenOut: params.tokenOut,
+    amountIn: params.amountIn,
+    gasInclude: "true", // Recommended by KyberSwap docs
+  });
 
-  if (params["position.tickLower"] !== undefined) {
-    searchParams.append(
-      "position.tickLower",
-      params["position.tickLower"].toString()
-    );
-  }
-  if (params["position.tickUpper"] !== undefined) {
-    searchParams.append(
-      "position.tickUpper",
-      params["position.tickUpper"].toString()
-    );
-  }
-
-  params.tokensIn.forEach((token) => searchParams.append("tokensIn", token));
-  params.amountsIn.forEach((amount) =>
-    searchParams.append("amountsIn", amount)
-  );
-
-  return `${API_BASE_URL}/${CHAIN_ID}/api/v1/in/route?${searchParams.toString()}`;
+  return `${AGGREGATOR_API_BASE_URL}/${CHAIN_ID}/api/v1/routes?${searchParams.toString()}`;
 };
 
 /**
  * @async
- * @function getZapInData
- * @description Step 1: Sends a request to get the zap route data.
+ * @function getAggregatorRouteData
+ * @description Step 1: Fetches the best swap route from the Aggregator API.
  */
-const getZapInData = async (params: ZapApiParams): Promise<any> => {
+const getAggregatorRouteData = async (
+  params: AggregatorApiParams
+): Promise<any> => {
   const apiUrl = buildGetRouteApiUrl(params);
   console.log(`Constructed Get Route URL: ${apiUrl}`);
   try {
-    console.log("Sending request to get zap route...");
-    const response = await axios.get(apiUrl);
-    console.log("Successfully received zap route.");
+    console.log("Sending request to get aggregator route...");
+    const response = await axios.get(apiUrl, {
+      headers: { "x-client-id": "jarvis-hl-script" },
+    });
+    console.log("Successfully received aggregator route.");
     return response.data;
   } catch (error) {
     console.error(
-      "An error occurred while calling the KyberSwap Zap API (get route)."
+      "An error occurred while calling the Aggregator API (get route)."
     );
     if (axios.isAxiosError(error)) {
       console.error(`Status: ${error.response?.status}`);
@@ -119,22 +119,26 @@ const generateApprovalTx = async (
 
 /**
  * @async
- * @function buildZapInTransaction
- * @description Step 3: Sends the route to the build endpoint to get final transaction data.
+ * @function buildAggregatorTransaction
+ * @description Step 2: Sends the route summary to get the final transaction data.
  */
-const buildZapInTransaction = async (params: BuildTxParams): Promise<any> => {
-  const apiUrl = `${API_BASE_URL}/${CHAIN_ID}/api/v1/in/route/build`;
+const buildAggregatorTransaction = async (
+  params: BuildAggregatorTxParams
+): Promise<any> => {
+  const apiUrl = `${AGGREGATOR_API_BASE_URL}/${CHAIN_ID}/api/v1/route/build`;
   console.log(`\n--- Building Final Transaction ---`);
   console.log(`Constructed Build TX URL: ${apiUrl}`);
 
   try {
     console.log("Sending request to build transaction...");
-    const response = await axios.post(apiUrl, params);
+    const response = await axios.post(apiUrl, params, {
+      headers: { "x-client-id": "jarvis-hl-script" },
+    });
     console.log("Successfully received transaction data.");
     return response.data;
   } catch (error) {
     console.error(
-      "An error occurred while calling the KyberSwap Zap API (build tx)."
+      "An error occurred while calling the Aggregator API (build tx)."
     );
     if (axios.isAxiosError(error)) {
       console.error(`Status: ${error.response?.status}`);
@@ -148,12 +152,12 @@ const buildZapInTransaction = async (params: BuildTxParams): Promise<any> => {
 
 /**
  * @function main
- * @description Main execution function to generate the list of required transactions.
+ * @description Main execution function to generate swap transactions.
  */
 const main = async (): Promise<TransactionCall[]> => {
-  console.log("--- Starting KyberSwap LP Creation Script ---");
+  console.log("--- Starting KyberSwap Aggregator Script ---");
 
-  const userWalletAddress = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B"; // Example address
+  const userWalletAddress = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
   console.log(`Using wallet address: ${userWalletAddress}`);
 
   if (!isAddress(userWalletAddress)) {
@@ -162,57 +166,53 @@ const main = async (): Promise<TransactionCall[]> => {
 
   const transactions: TransactionCall[] = [];
 
+  // --- Example: Swap 1 USDC for WETH on Base ---
   const USDC_ADDRESS = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
-  const zapAmount = "1000000"; // 1 USDC, since it has 6 decimals
+  const WETH_ADDRESS = "0x4200000000000000000000000000000000000006";
+  const swapAmount = "1000000"; // 1 USDC (6 decimals)
 
-  const zapParams: ZapApiParams = {
-    dex: "DEX_UNISWAPV3",
-    "pool.id": "0xedc625b74537ee3a10874f53d170e9c17a906b9c", // Pool: ZORA-WETH 0.05% on Base
-    "position.tickLower": 193380,
-    "position.tickUpper": 193440,
-    tokensIn: [USDC_ADDRESS],
-    amountsIn: [zapAmount],
-    slippage: 50, // 0.5%
+  const aggregatorParams: AggregatorApiParams = {
+    tokenIn: USDC_ADDRESS,
+    tokenOut: WETH_ADDRESS,
+    amountIn: swapAmount,
   };
 
-  const NATIVE_TOKEN_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-
   try {
-    // Step 1: Get the encoded route from the API
-    const routeResponse = await getZapInData(zapParams);
+    const routeResponse = await getAggregatorRouteData(aggregatorParams);
     const routerAddress = routeResponse?.data?.routerAddress;
-    const route = routeResponse?.data?.route;
+    const routeSummary = routeResponse?.data?.routeSummary;
 
-    if (routerAddress && route) {
-      // Step 2 (Conditional): Generate approval transaction if the input is an ERC20 token
-      const tokenIn = zapParams.tokensIn[0];
-      if (tokenIn.toLowerCase() !== NATIVE_TOKEN_ADDRESS.toLowerCase()) {
+    if (routerAddress && routeSummary) {
+      if (
+        aggregatorParams.tokenIn.toLowerCase() !==
+        NATIVE_TOKEN_ADDRESS.toLowerCase()
+      ) {
         const approvalTx = await generateApprovalTx(
-          tokenIn,
+          aggregatorParams.tokenIn,
           userWalletAddress,
           routerAddress,
-          zapParams.amountsIn[0]
+          aggregatorParams.amountIn
         );
         if (approvalTx) {
           transactions.push(approvalTx);
         }
       }
 
-      // Step 3: Use the route to build the final transaction data
-      const buildParams: BuildTxParams = {
-        route: route,
+      const buildParams: BuildAggregatorTxParams = {
+        routeSummary: routeSummary,
         sender: userWalletAddress,
         recipient: userWalletAddress,
+        slippageTolerance: 50, // 0.5%
         source: "jarvis-hl-script",
       };
 
-      const buildResponse = await buildZapInTransaction(buildParams);
+      const buildResponse = await buildAggregatorTransaction(buildParams);
 
       if (buildResponse && buildResponse.data) {
         const swapTransaction: TransactionCall = {
           to: buildResponse.data.routerAddress,
-          data: buildResponse.data.callData,
-          value: buildResponse.data.value || "0", // Use value from API, default to "0"
+          data: buildResponse.data.data, // Note: field is named `data` in this API response
+          value: buildResponse.data.transactionValue || "0",
         };
         transactions.push(swapTransaction);
       }
@@ -227,5 +227,4 @@ const main = async (): Promise<TransactionCall[]> => {
   return transactions;
 };
 
-// --- Run the main function ---
 main();
