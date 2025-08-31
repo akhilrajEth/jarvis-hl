@@ -12,13 +12,11 @@ import { AllocationFormat, AllocationItem } from "@/types";
 interface AllocationSummaryBoxProps {
   format: AllocationFormat;
   allocation: AllocationItem;
-  hasButton?: boolean;
 }
 
 export default function AllocationSummaryBox({
   format,
   allocation,
-  hasButton = true,
 }: AllocationSummaryBoxProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditPercentOpen, setIsEditPercentOpen] = useState(false);
@@ -48,7 +46,6 @@ export default function AllocationSummaryBox({
               <Typography variant="h6" sx={{ textAlign: "left" }}>{format.category}</Typography>
             </div>
             <div className="flex items-center ml-4">
-              {hasButton ? (
                 <PrimaryButton
                   endIcon={<AddCircleOutlineOutlinedIcon />}
                   onClick={() => {
@@ -57,16 +54,6 @@ export default function AllocationSummaryBox({
                 >
                   Add
                 </PrimaryButton>
-              ) : (
-                // Vault allocation: show asset image as clickable link
-                <a href="https://app.loopingcollective.org/product/whlp" target="_blank" rel="noopener noreferrer">
-                  <Avatar
-                    src={VAULT_ASSET_LIST[0].image}
-                    alt={VAULT_ASSET_LIST[0].name}
-                    sx={{ width: 48, height: 48, cursor: "pointer" }}
-                  />
-                </a>
-              )}
             </div>
           </div>
 

@@ -110,7 +110,6 @@ export default function Allocation({ isOnboarding = false, onSkip }: AllocationV
             <AllocationSummaryBox
               format={VAULT_ALLOCATION_FORMAT}
               allocation={findAllocation(AllocationType.VAULT)}
-              hasButton={false}
             />
           </div>
           <div className="flex flex-row gap-12">
@@ -159,7 +158,6 @@ export default function Allocation({ isOnboarding = false, onSkip }: AllocationV
             )}
           </div>
         </div>
-        {/* Jarvis AI Chat floating chatbox */}
         <JarvisAIChat />
       </main>
     </div>
