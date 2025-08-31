@@ -35,8 +35,8 @@ export default function AllocationSummaryBox({
         }}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="flex flex-row items-start w-full">
+            <div className="flex flex-col items-start flex-1">
               <div className="flex items-center gap-2">
                 <Typography variant="h4" component="p" sx={{ lineHeight: 1.2 }}>
                   {allocation.percentage}%
@@ -45,28 +45,29 @@ export default function AllocationSummaryBox({
                   <EditIcon fontSize="small" />
                 </IconButton>
               </div>
-              <Typography variant="h6">{format.category}</Typography>
+              <Typography variant="h6" sx={{ textAlign: "left" }}>{format.category}</Typography>
             </div>
-
-            {hasButton ? (
-              <PrimaryButton
-                endIcon={<AddCircleOutlineOutlinedIcon />}
-                onClick={() => {
-                  setIsModalOpen(true);
-                }}
-              >
-                Add
-              </PrimaryButton>
-            ) : (
-              // Vault allocation: show asset image as clickable link
-              <a href="https://app.loopingcollective.org/product/whlp" target="_blank" rel="noopener noreferrer">
-                <Avatar
-                  src={VAULT_ASSET_LIST[0].image}
-                  alt={VAULT_ASSET_LIST[0].name}
-                  sx={{ width: 48, height: 48, cursor: "pointer" }}
-                />
-              </a>
-            )}
+            <div className="flex items-center ml-4">
+              {hasButton ? (
+                <PrimaryButton
+                  endIcon={<AddCircleOutlineOutlinedIcon />}
+                  onClick={() => {
+                    setIsModalOpen(true);
+                  }}
+                >
+                  Add
+                </PrimaryButton>
+              ) : (
+                // Vault allocation: show asset image as clickable link
+                <a href="https://app.loopingcollective.org/product/whlp" target="_blank" rel="noopener noreferrer">
+                  <Avatar
+                    src={VAULT_ASSET_LIST[0].image}
+                    alt={VAULT_ASSET_LIST[0].name}
+                    sx={{ width: 48, height: 48, cursor: "pointer" }}
+                  />
+                </a>
+              )}
+            </div>
           </div>
 
           <div className="mt-auto pt-4">

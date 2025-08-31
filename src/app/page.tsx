@@ -28,11 +28,6 @@ export default function Home() {
         if (embeddedAccount) {
           await findOrCreateUser(user.wallet.address, embeddedAccount);
         }
-        // Only redirect if login was initiated by button
-        if (loginInitiated) {
-          router.push("/riskprofile");
-          setLoginInitiated(false);
-        }
       }
     };
     handleUserSession();
@@ -44,7 +39,18 @@ export default function Home() {
       await login();
       // Do not redirect here; wait for authentication in useEffect
     } else {
-      router.push("/riskprofile");
+      // Check if user has a portfolio(onboard or dashboard)
+      const { getUserPortfolio } = await import("@/utils/getUserPortfolio");
+      const walletAddress = user?.wallet?.address;
+      if (!walletAddress) {
+        return;
+      }
+      const portfolio = await getUserPortfolio(walletAddress);
+      if (!portfolio) {
+        router.push("/onboarding");
+      } else {
+        router.push("/dashboard");
+      }
     }
   };
 

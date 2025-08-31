@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "@mui/material";
+import JarvisAIChat from "@/components/jarvis-ai-chat";
 import {
   Typography,
   Accordion,
@@ -27,7 +29,12 @@ import {
 } from "./constants";
 import { AllocationType } from "@/constants";
 
-export default function Allocation() {
+interface AllocationViewProps {
+  isOnboarding?: boolean;
+  onSkip?: () => void;
+}
+
+export default function Allocation({ isOnboarding = false, onSkip }: AllocationViewProps) {
   const { state: portfolio, dispatch } = usePortfolio();
   // Listen for percent edit events from AllocationSummaryBox
   useEffect(() => {
@@ -75,7 +82,10 @@ export default function Allocation() {
       alert("Total allocation percentage must add up to 100%.");
       return;
     }
-    router.push("/preferences");
+    if (isOnboarding) {
+      // Go to next onboarding step (step 2)
+      window.dispatchEvent(new CustomEvent("onboarding-next-step"));
+    } 
   };
 
   const findAllocation = (category: AllocationType) => {
@@ -90,70 +100,7 @@ export default function Allocation() {
 
   return (
     <div className="flex flex-col h-screen">
-      <Navbar />
-
       <main className="p-8 overflow-y-auto">
-        <div className="flex flex-col gap-1">
-          {assessment ? (
-            <>
-              <Typography variant="h6" fontWeight={550}>
-                Here’s the portfolio I designed for you...
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Your portfolio is based on a{" "}
-                <b className="text-black">{assessment.risk_profile}</b>{" "}
-                risk profile. Start adding assets you prefer for each category.
-              </Typography>
-            </>
-          ) : (
-            <>
-              <Typography variant="h6" fontWeight={550}>
-                Please select your asset allocations.
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                If you'd like our agent to build a risk profile and recommend allocations for you, please head here:
-              </Typography>
-              <PrimaryButton
-                onClick={() => router.push("/riskprofile")}
-                startIcon={<PsychologyIcon />}
-                sx={{ mt: 2 }}
-              >
-                Go to Risk Profile
-              </PrimaryButton>
-            </>
-          )}
-        </div>
-
-        <div className="max-w-[40rem] pt-8">
-          {!isLoading && assessment && (
-            <Accordion
-              variant="outlined"
-              sx={{
-                borderRadius: 2,
-                "&:before": { display: "none" },
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="reasoning-panel-content"
-                id="reasoning-panel-header"
-              >
-                <div className="flex items-center gap-2">
-                  <PsychologyIcon color="action" />
-                  <Typography fontWeight={500}>
-                    View Reasoning Behind This Portfolio
-                  </Typography>
-                </div>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Typography color="text.secondary">
-                  {assessment.reasoning}
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-          )}
-        </div>
-
         <div className="flex flex-col gap-4 max-w-[40rem] pt-8">
           <div className="flex flex-row gap-12">
             <AllocationSummaryBox
@@ -176,16 +123,44 @@ export default function Allocation() {
               allocation={findAllocation(AllocationType.LP)}
             />
           </div>
-
-          <div className="pt-12">
+          <div className="pt-12 flex gap-4 justify-center">
             <PrimaryButton
               onClick={handleContinue}
-              endIcon={<EastRoundedIcon />}
             >
               Continue
             </PrimaryButton>
+            {isOnboarding && (
+              <Button
+                variant="text"
+                size="medium"
+                sx={{
+                  color: "#b3b3b3",
+                  fontWeight: 400,
+                  fontSize: "0.98rem",
+                  boxShadow: "none",
+                  border: "none",
+                  background: "none",
+                  textTransform: "none",
+                  p: 0,
+                  minWidth: 0,
+                  fontStyle: "italic",
+                  letterSpacing: 0,
+                  opacity: 0.85,
+                  '&:hover': {
+                    background: 'none',
+                    textDecoration: 'underline',
+                    opacity: 1,
+                  },
+                }}
+                onClick={onSkip}
+              >
+                Skip →
+              </Button>
+            )}
           </div>
         </div>
+        {/* Jarvis AI Chat floating chatbox */}
+        <JarvisAIChat />
       </main>
     </div>
   );

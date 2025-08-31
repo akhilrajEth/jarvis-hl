@@ -60,11 +60,13 @@ export default function Navbar() {
           fontWeight: 500,
           letterSpacing: "0.02em",
           textTransform: "none",
+          cursor: "pointer",
           "&:hover": {
             color: "#B0B0B0", 
             transition: "color 0.2s ease-in-out", 
           },
         }}
+        onClick={() => router.push("/")}
       >
         Jarvis
       </Typography>
