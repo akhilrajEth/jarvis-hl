@@ -4,7 +4,8 @@
 
 import React, { useEffect } from "react";
 import { Box, Typography, Button } from "@mui/material";
-import { GlowOrb } from "../components/orb";
+import { TypeAnimation } from "react-type-animation";
+import "./typeAnimation.css";
 import { BoxStyles, ButtonStyles } from "./constants";
 import Navbar from "../components/navbar";
 import { usePrivy } from "@privy-io/react-auth";
@@ -51,31 +52,48 @@ export default function Home() {
     <div>
       <Navbar />
       <Box sx={BoxStyles}>
-        <GlowOrb size={150} color="rgba(100, 200, 255, 0.3)" top="15%" />
-
         <Typography
           variant="h2"
           component="h1"
           gutterBottom
           sx={{ fontWeight: 500, pt: 8 }}
         >
-          Hey, I’m Jarvis{" "}
-          <span role="img" aria-label="waving hand">
-            👋
-          </span>
+          Crypto on Autopilot
         </Typography>
 
         <Typography
-          variant="body1"
-          sx={{ mb: 4, maxWidth: 500, fontSize: 20 }}
+          variant="h5"
+          component="h2"
+          gutterBottom
+          sx={{ fontWeight: 400, color: "#73F4C9" }}
         >
-          No manual tweaking needed – just set it and forget it.
+          <span style={{ position: "relative" }}>
+            <span className="custom-type-animation">
+              <TypeAnimation
+                sequence={[
+                  "Lending",
+                  2000,
+                  "Swaps",
+                  2000,
+                  "Vaults",
+                  2000,
+                  "LP",
+                  2000,
+                ]}
+                wrapper="span"
+                speed={50}
+                repeat={Infinity}
+                cursor={false}
+              />
+            </span>
+            <span className="custom-cursor" style={{ fontWeight: 700, color: "#73F4C9" }}>_</span>
+          </span>
         </Typography>
 
         <Button
           variant="contained"
           size="large"
-          sx={ButtonStyles}
+          sx={{ ...ButtonStyles, mt: 4 }}
           onClick={handleButtonClick}
         >
           {authenticated ? "Go to App" : "Get Started"}

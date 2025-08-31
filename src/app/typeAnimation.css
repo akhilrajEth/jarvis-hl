@@ -1,0 +1,10 @@
+.custom-type-animation span[aria-hidden="true"] {
+  display: none; /* Hide only the default cursor from react-type-animation */
+}
+.custom-cursor {
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}

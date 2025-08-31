@@ -50,16 +50,24 @@ export default function Navbar() {
   return (
     <AppBar position="static" elevation={0} sx={AppBarStyles}>
       <Toolbar>
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{
-            flexGrow: 1,
-            color: "text.primary",
-          }}
-        >
-          Jarvis
-        </Typography>
+       <Typography
+        variant="h5" 
+        component="div"
+        sx={{
+          flexGrow: 1,
+          color: "text.primary",
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 500,
+          letterSpacing: "0.02em",
+          textTransform: "none",
+          "&:hover": {
+            color: "#B0B0B0", 
+            transition: "color 0.2s ease-in-out", 
+          },
+        }}
+      >
+        Jarvis
+      </Typography>
 
         {ready && (
           <>
