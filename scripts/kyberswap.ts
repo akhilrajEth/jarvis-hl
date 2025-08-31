@@ -2,6 +2,9 @@ import axios from "axios";
 import { URLSearchParams } from "url";
 import { BuildTxParams, ZapApiParams } from "./types";
 
+// Note: Thiz zap script will only work for LPing
+// To-Do: Find a zap script for other yield bearing tokens
+
 const API_BASE_URL = "https://zap-api.kyberswap.com";
 const CHAIN_ID = "base";
 
