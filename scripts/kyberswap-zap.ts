@@ -1,4 +1,5 @@
 // Note: Run this script with npx ts-node --project tsconfig.scripts.json scripts/kyberswap-zap.ts
+// Note: This is a test script
 
 import axios from "axios";
 import { URLSearchParams } from "url";

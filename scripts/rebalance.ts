@@ -1,4 +1,5 @@
 // Note: Run this script with "npx ts-node --project tsconfig.scripts.json scripts/rebalance.ts"
+// Note: This is a test script
 
 import axios from "axios";
 import { PriceData, TokenData, UserForRebalance } from "./types";

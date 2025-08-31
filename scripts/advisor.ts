@@ -1,4 +1,5 @@
 // Note: Run this script with "npx ts-node --project tsconfig.scripts.json scripts/advisor.ts"
+// Note: This is a test script
 
 import OpenAI from "openai";
 import { z } from "zod";
