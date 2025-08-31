@@ -11,7 +11,7 @@ interface HyperLendReserve {
   aTokenAddress: string;
 }
 
-async function getATokenAddress(
+export async function getATokenAddress(
   underlyingAssetAddress: string
 ): Promise<string> {
   try {
