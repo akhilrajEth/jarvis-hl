@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Box, Typography, Button } from "@mui/material";
-import "./typeAnimation.css";
-import { BoxStyles, ButtonStyles } from "./constants";
+import { Typography, Button } from "@mui/material";
+import { ButtonStyles } from "./constants";
 import Navbar from "../components/navbar";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
@@ -43,7 +42,7 @@ export default function Home() {
       }
       const portfolio = await getUserPortfolio(walletAddress);
       if (!portfolio) {
-        router.push("/onboarding");
+        router.push("/onboarding/allocations");
       } else {
         router.push("/dashboard");
       }
@@ -53,7 +52,7 @@ export default function Home() {
   return (
     <div>
       <Navbar />
-      <Box sx={BoxStyles}>
+      <div className="flex flex-col items-center justify-center h-[50vh] text-center p-2">
         <GlowOrb size={150} color="rgba(100, 200, 255, 0.3)" top="15%" />
 
         <Typography
@@ -62,7 +61,7 @@ export default function Home() {
           gutterBottom
           sx={{ fontWeight: 500, pt: 50 }}
         >
-          Hey, I’m Jarvis{" "}
+          Hey, I’m Jarvis
           <span role="img" aria-label="waving hand">
             👋
           </span>
@@ -90,7 +89,7 @@ export default function Home() {
         >
           {authenticated ? "Go to App" : "Get Started"}
         </Button>
-      </Box>
+      </div>
     </div>
   );
 }

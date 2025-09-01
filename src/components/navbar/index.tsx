@@ -1,20 +1,36 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Icon,
+  IconButton,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { ButtonStyles, AppBarStyles } from "./constants";
 import { usePrivy } from "@privy-io/react-auth";
 import { useSmartAccount } from "@/utils/useSmartAccount";
 import { findOrCreateUser } from "@/utils/findOrCreateUser";
+import { usePathname } from "next/navigation";
+import MenuIcon from "@mui/icons-material/Menu";
+import { SmartWalletAddress } from "../smart-wallet-address";
+import { Sidebar } from "../sidebar";
 
 export default function Navbar() {
   const { ready, authenticated, user, login, logout } = usePrivy();
   const { smartWalletAddress } = useSmartAccount();
 
   const router = useRouter();
+  const pathname = usePathname();
+
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const isSignedIn = ready && authenticated;
+  const isOnDashboard = pathname === "/dashboard";
 
   useEffect(() => {
     const handleUserSession = async () => {
@@ -48,51 +64,56 @@ export default function Navbar() {
   };
 
   return (
-    <AppBar position="static" elevation={0} sx={AppBarStyles}>
-      <Toolbar>
-       <Typography
-        variant="h5" 
-        component="div"
-        sx={{
-          flexGrow: 1,
-          color: "text.primary",
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 500,
-          letterSpacing: "0.02em",
-          textTransform: "none",
-          cursor: "pointer",
-          "&:hover": {
-            color: "#B0B0B0", 
-            transition: "color 0.2s ease-in-out", 
-          },
-        }}
-        onClick={() => router.push("/")}
-      >
-        Jarvis
-      </Typography>
+    <>
+      <AppBar position="static" elevation={0} sx={AppBarStyles}>
+        <Toolbar>
+          {isOnDashboard ? (
+            <IconButton sx={{ mr: 2 }} onClick={() => setSidebarOpen(true)}>
+              <MenuIcon />
+            </IconButton>
+          ) : null}
+          <Typography
+            variant="h5"
+            component="div"
+            sx={{
+              flexGrow: 1,
+              color: "text.primary",
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 500,
+              letterSpacing: "0.02em",
+              textTransform: "none",
+              cursor: "pointer",
+              "&:hover": {
+                color: "#B0B0B0",
+                transition: "color 0.2s ease-in-out",
+              },
+            }}
+            onClick={() => router.push("/")}
+          >
+            Jarvis
+          </Typography>
 
-        {ready && (
-          <>
-            <Box sx={{ mx: 2 }}>
-              <Typography variant="body2" color="text.secondary" noWrap>
-                {smartWalletAddress
-                  ? `Smart Wallet: ${smartWalletAddress}`
-                  : "No Smart Wallet"}
-              </Typography>
-            </Box>
-            <Box>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={ButtonStyles}
-                onClick={isSignedIn ? handleLogout : login}
-              >
-                {isSignedIn ? "Sign Out" : "Sign In"}
-              </Button>
-            </Box>
-          </>
-        )}
-      </Toolbar>
-    </AppBar>
+          {ready && (
+            <>
+              <div className="mx-2">
+                <SmartWalletAddress address={smartWalletAddress} />
+              </div>
+              <div>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={ButtonStyles}
+                  onClick={isSignedIn ? handleLogout : login}
+                >
+                  {isSignedIn ? "Sign Out" : "Sign In"}
+                </Button>
+              </div>
+            </>
+          )}
+        </Toolbar>
+
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
+      </AppBar>
+    </>
   );
 }

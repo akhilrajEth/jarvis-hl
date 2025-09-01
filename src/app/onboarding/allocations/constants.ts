@@ -10,8 +10,8 @@ export const SPOT_ALLOCATION_FORMAT = {
 };
 
 export const VAULT_ALLOCATION_FORMAT = {
-  category: "Vault",
-  description: "Add up to 5 vaults",
+  category: "HL Vault",
+  description: "Only support one vault.",
   riskLevel: {
     description: "Managed Strategy Risk",
     bgColor: "#fff3e0",

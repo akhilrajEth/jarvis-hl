@@ -1,13 +1,3 @@
-export const BoxStyles = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  height: "50vh",
-  textAlign: "center",
-  padding: 2,
-};
-
 export const ButtonStyles = {
   backgroundColor: "#000",
   color: "#fff",

@@ -24,7 +24,6 @@ import { getTokenBalance } from "@/utils/getTokenBalance";
 import { AllocationItem } from "@/types";
 import { useSessionSigners } from "@privy-io/react-auth";
 
-// Icon Imports
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import SavingsIcon from "@mui/icons-material/Savings";
@@ -32,7 +31,6 @@ import DonutLargeIcon from "@mui/icons-material/DonutLarge";
 import LockIcon from "@mui/icons-material/Lock";
 import { AllocationType } from "@/constants";
 
-// Styled components and helper functions
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   padding: "16px",
   borderBottom: `1px solid ${theme.palette.grey[200]}`,
