@@ -1,16 +1,15 @@
-// src/app/page.tsx
-
 "use client";
 
 import React, { useEffect } from "react";
 import { Box, Typography, Button } from "@mui/material";
-import { TypeAnimation } from "react-type-animation";
 import "./typeAnimation.css";
 import { BoxStyles, ButtonStyles } from "./constants";
 import Navbar from "../components/navbar";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import { findOrCreateUser } from "@/utils/findOrCreateUser";
+import { GlowOrb } from "@/components/orb";
+import { getUserPortfolio } from "@/utils/getUserPortfolio";
 
 export default function Home() {
   const router = useRouter();
@@ -37,10 +36,7 @@ export default function Home() {
     if (!authenticated) {
       setLoginInitiated(true);
       await login();
-      // Do not redirect here; wait for authentication in useEffect
     } else {
-      // Check if user has a portfolio(onboard or dashboard)
-      const { getUserPortfolio } = await import("@/utils/getUserPortfolio");
       const walletAddress = user?.wallet?.address;
       if (!walletAddress) {
         return;
@@ -58,48 +54,38 @@ export default function Home() {
     <div>
       <Navbar />
       <Box sx={BoxStyles}>
+        <GlowOrb size={150} color="rgba(100, 200, 255, 0.3)" top="15%" />
+
         <Typography
           variant="h2"
           component="h1"
           gutterBottom
-          sx={{ fontWeight: 500, pt: 8 }}
+          sx={{ fontWeight: 500, pt: 50 }}
         >
-          Crypto on Autopilot
+          Hey, I’m Jarvis{" "}
+          <span role="img" aria-label="waving hand">
+            👋
+          </span>
+        </Typography>
+
+        <Typography variant="h5" component="p" gutterBottom>
+          Your onchain co-pilot.
         </Typography>
 
         <Typography
-          variant="h5"
-          component="h2"
-          gutterBottom
-          sx={{ fontWeight: 400, color: "#73F4C9" }}
+          variant="body1"
+          component="p"
+          sx={{ fontStyle: "italic", color: "gray", marginBottom: 4 }}
         >
-          <span style={{ position: "relative" }}>
-            <span className="custom-type-animation">
-              <TypeAnimation
-                sequence={[
-                  "Lending",
-                  2000,
-                  "Swaps",
-                  2000,
-                  "Vaults",
-                  2000,
-                  "LP",
-                  2000,
-                ]}
-                wrapper="span"
-                speed={50}
-                repeat={Infinity}
-                cursor={false}
-              />
-            </span>
-            <span className="custom-cursor" style={{ fontWeight: 700, color: "#73F4C9" }}>_</span>
-          </span>
+          I’ll help you create the best portfolio allocation across{" "}
+          <strong>vaults, LP, lending, and spot</strong>, and actively rebalance
+          it for you.
         </Typography>
 
         <Button
           variant="contained"
           size="large"
-          sx={{ ...ButtonStyles, mt: 4 }}
+          sx={ButtonStyles}
           onClick={handleButtonClick}
         >
           {authenticated ? "Go to App" : "Get Started"}
